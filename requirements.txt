@@ -2,9 +2,10 @@ numpy
 Pillow
 qrcode
 scikit-learn
-torch
-torchvision
+torch==1.7.1
+torchvision==0.8.2
 tqdm
 opencv-python==4.4.0.46
 imageio==2.9.0
 streamlit
+opencv-python
