@@ -15,6 +15,7 @@ st.write('You selected:', nst_method)
 
 QR_CODE_PATH = "./images/qr-images/userinput.png"
 st.header("Enter the url you want to generate:")
+qr_code = None
 url = st.text_input("URL", "")
 if url != "":
     qr_code, qr_version = utils_evil.generate_qr_code(url, module_size=16)
