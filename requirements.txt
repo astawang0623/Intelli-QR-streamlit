@@ -8,4 +8,5 @@ tqdm
 opencv-python==4.4.0.46
 imageio==2.9.0
 streamlit
+streamlit-ext
 opencv-python

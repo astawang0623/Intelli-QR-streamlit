@@ -1,33 +1,41 @@
 import streamlit as st
+import streamlit_ext as ste
 from PIL import Image
 import utils_evil
 import argparse
+from io import BytesIO
 
+st.set_page_config(page_title="Intelli-QR")
 
 # Page title
-st.title("Pytorch Neural Style Transfer On Streamlit")
+st.title("Intelli-QR")
+st.write("## Styled QR Code Generator")
 
 
-# Pick NST method
-nst_method = st.selectbox('Pick NST method: ', ('Stytr2', 'AdaIN', 'Mast', 'SANet'))
-st.write('You selected:', nst_method)
-
+def convert_image(img):
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    byte_im = buf.getvalue()
+    return byte_im
 
 QR_CODE_PATH = "./images/qr-images/userinput.png"
-st.header("Enter the url you want to generate:")
 qr_code = None
+st.header("Enter the url you want to generate:")
 url = st.text_input("URL", "")
 if url != "":
     qr_code, qr_version = utils_evil.generate_qr_code(url, module_size=16)
     # qr_code.save(QR_CODE_PATH)
     st.image(qr_code, caption="QR Code", width=256)
 
+# Pick NST method
+nst_method = st.selectbox('Pick NST method: ', ('Stytr2', 'AdaIN', 'Mast', 'SANet'))
+
 upload_column_1, upload_column_2 = st.columns(2)
 with upload_column_1:
-    st.header("Choose your content image:")
+    st.header("Content image:")
     upload_content_img = st.file_uploader("Upload content image here (png or jpg)", type=['png', 'jpg'])
 with upload_column_2:
-    st.header("Choose your style image:")
+    st.header("Style image:")
     upload_style_img = st.file_uploader("Upload style image here (png or jpg)", type=['png', 'jpg'])
 
 
@@ -122,6 +130,7 @@ if upload_content_img is not None and upload_style_img is not None and qr_code i
 
     code_size = (4 * qr_version + 17) * args.code_module_size
 
+    output_qr_colored = None
     
     if st.button('Create Style Transfer QR Code'):
         background_image = utils_evil.tensor_to_PIL(style_transfer_with_input(args, input_content_image, input_style_img)).convert("RGB").resize([code_size, code_size], Image.Resampling.LANCZOS)
@@ -136,8 +145,14 @@ if upload_content_img is not None and upload_style_img is not None and qr_code i
                                                    qr_version=qr_version,
                                                    module_size=args.code_module_size)
         output_qr_colored = utils_evil.add_border(output_qr_colored, 8)
-        st.image(output_qr_colored, use_column_width=True)
+        st.image(output_qr_colored, width=400)
         st.write("You can right click to save the code now!")
+
+    if output_qr_colored is not None:
+        ste.download_button(label="Download QR",
+                    data=convert_image(output_qr_colored),
+                    file_name="intelli_qr.jpg",
+                    mime="image/jpg")
         
     # else:
     #     st.write('click button to run model')
