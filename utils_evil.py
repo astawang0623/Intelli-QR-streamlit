@@ -82,7 +82,7 @@ def tensor_to_PIL(tensor):
 
 def colorize_code(background_PIL: Image, code_PIL: Image, selected_colors=5):
     def k_means(pixels, n):
-        cluster = KMeans(n_clusters=n)
+        cluster = KMeans(n_clusters=n, n_init=5)
         cluster.fit(pixels)
         centers = cluster.cluster_centers_
 
@@ -101,19 +101,29 @@ def colorize_code(background_PIL: Image, code_PIL: Image, selected_colors=5):
     counts, colors = [list(tuple) for tuple in tuples]
     
     # contranst should > threshold
-    contrast_thr = 300
-    dominant_colors_index = colors[0] # choose the most dominant color as default
+    contrast_thr = 320
+    idx = 0
     qr_result = np.array(code_PIL)
+    contrast_alert = True
 
+    for idx in range(len(colors)):
+        dominant_colors_index = colors[idx]
+        if 255 * 3 - np.sum(centers[dominant_colors_index]) >= contrast_thr:
+            contrast_alert = False
+            break
     
+    if contrast_alert:
+        dominant_colors_index = colors[0]
+        
     black_module_index = np.where((qr_result < [128, 128, 128]).all(
         axis=2))
     qr_result[black_module_index] = centers[dominant_colors_index]
     
-    if 255 * 3 - np.sum(centers[dominant_colors_index]) < contrast_thr:
+    if contrast_alert:
         qr_result = cv2.cvtColor(qr_result, cv2.COLOR_RGB2HLS_FULL)
         qr_result[black_module_index[0],black_module_index[1], 1] = 120
         qr_result = cv2.cvtColor(qr_result, cv2.COLOR_HLS2RGB_FULL)
+    
     qr_result = Image.fromarray(qr_result)
     return qr_result
 
