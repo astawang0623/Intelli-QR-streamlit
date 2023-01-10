@@ -11,6 +11,8 @@ st.set_page_config(page_title="Intelli-QR")
 st.title("Intelli-QR")
 st.write("## Styled QR Code Generator")
 st.write("(or just QR Code Generator)")
+st.write("Note: please be patient when there is \"RUNNING...\" on the upper right of the page.")
+st.write("It takes a while to process the image.")
 
 
 def convert_image(img):
