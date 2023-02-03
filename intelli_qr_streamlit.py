@@ -57,8 +57,8 @@ with tab_1: # Styled QR Code
     # Pick NST method
     st.subheader('Select a NST method: ')
     # nst_method = st.selectbox('select NST method', ('Stytr2', 'AdaIN', 'Mast', 'SANet'))
-    nst_method = st.selectbox('select NST method', ('AdaIN'))
-
+    nst_method = st.selectbox('select NST method', ('AdaIN', 'Mast', 'SANet'))
+    
     if upload_content_img is not None and upload_style_img is not None and qr_code is not None:
         
         OUTPUT_PATH = './outputs-streamlit/'
