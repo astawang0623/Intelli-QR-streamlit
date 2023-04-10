@@ -9,10 +9,10 @@ st.set_page_config(page_title="Intelli-QR")
 
 # Page title
 st.title("Intelli-QR")
-st.write("## Styled QR Code Generator")
-st.write("(or just QR Code Generator)")
+st.write("## Aesthetic QR Code Generator")
+st.write("(or styled QR Code Generator)")
 st.write("Note: please be patient when there is \"RUNNING...\" on the upper right of the page.")
-st.write("It takes a while to process the image.")
+# st.write("It takes a while to process the image.")
 
 
 def convert_image(img):
@@ -22,15 +22,50 @@ def convert_image(img):
     return byte_im
 
 qr_code = None
-st.subheader("Enter the url you want to generate:")
-url = st.text_input("URL", "")
+st.subheader("Enter url.")
+url = st.text_input("url:", "")
 if url != "":
     qr_code, qr_version = utils_evil.generate_qr_code(url, module_size=16)
-    st.image(qr_code, caption="QR Code", width=256)
+    st.write("Now select the type of QR code you want!")
+    # st.image(qr_code, caption="QR Code", width=256)
 
-tab_1, tab_2 = st.tabs(["Styled QR", "NOT-Styled QR"])
+tab_1, tab_2 = st.tabs(["NOT-Styled QR", "Styled QR"])
+    
+with tab_1: # NOT-styled QR Code
+    st.subheader("Background image: ")
+    upload_background_image = st.file_uploader("Upload background image here (png or jpg)", type=['png', 'jpg'])
+    if upload_background_image is not None:
+        background_image = Image.open(upload_background_image).convert("RGB")
+        st.image(background_image, caption='Content Image', width=400)
+        
+    output_qr_colored = None
+        
+    if (qr_code is not None) and (upload_background_image is not None):
+        code_size = (4 * qr_version + 17) * 16
+        
+        if st.button('Generate QR!'):
+            background_image = background_image.resize([code_size, code_size], Image.Resampling.LANCZOS)
+            qr_code_colored = utils_evil.colorize_code(background_image, qr_code)
+            arr = utils_evil.embbed_qr_rgb(background_image,
+                                        qr_code, 
+                                        module_size=16,
+                                        qr_version=qr_version)
+            output_qr_colored = Image.fromarray(arr).convert("RGB")
+            output_qr_colored = utils_evil.add_pattern(output_qr_colored,
+                                                       qr_code_colored,
+                                                       qr_version=qr_version,
+                                                       module_size=16)
+            output_qr_colored = utils_evil.add_border(output_qr_colored, 8)
+            st.image(output_qr_colored, width=400)
+            st.write("You can click download button to save the code now!")
 
-with tab_1: # Styled QR Code
+            if output_qr_colored is not None:
+                ste.download_button(label="Download QR",
+                            data=convert_image(output_qr_colored),
+                            file_name="intelli_qr.jpg",
+                            mime="image/jpg")
+            
+with tab_2: # Styled QR Code
     upload_column_1, upload_column_2 = st.columns(2)
     with upload_column_1:
         st.subheader("Content image:")
@@ -135,45 +170,11 @@ with tab_1: # Styled QR Code
                                                     module_size=args.code_module_size)
             output_qr_colored = utils_evil.add_border(output_qr_colored, 8)
             st.image(output_qr_colored, width=400)
-            st.write("You can right click to save the code now!")
+            st.write("You can click download button to save the code now!")
 
         if output_qr_colored is not None:
             ste.download_button(label="Download QR",
                         data=convert_image(output_qr_colored),
                         file_name="intelli_qr.jpg",
                         mime="image/jpg")
-        
-with tab_2: # NOT-styled QR Code
-    st.subheader("Background image: ")
-    upload_background_image = st.file_uploader("Upload background image here (png or jpg)", type=['png', 'jpg'])
-    if upload_background_image is not None:
-        background_image = Image.open(upload_background_image).convert("RGB")
-        st.image(background_image, caption='Content Image', width=400)
-        
-    output_qr_colored = None
-        
-    if (qr_code is not None) and (upload_background_image is not None):
-        code_size = (4 * qr_version + 17) * 16
-        
-        if st.button('Generate QR!'):
-            background_image = background_image.resize([code_size, code_size], Image.Resampling.LANCZOS)
-            qr_code_colored = utils_evil.colorize_code(background_image, qr_code)
-            arr = utils_evil.embbed_qr_rgb(background_image,
-                                        qr_code, 
-                                        module_size=16,
-                                        qr_version=qr_version)
-            output_qr_colored = Image.fromarray(arr).convert("RGB")
-            output_qr_colored = utils_evil.add_pattern(output_qr_colored,
-                                                       qr_code_colored,
-                                                       qr_version=qr_version,
-                                                       module_size=16)
-            output_qr_colored = utils_evil.add_border(output_qr_colored, 8)
-            st.image(output_qr_colored, width=400)
-            st.write("You can right click to save the code now!")
-
-            if output_qr_colored is not None:
-                ste.download_button(label="Download QR",
-                            data=convert_image(output_qr_colored),
-                            file_name="intelli_qr.jpg",
-                            mime="image/jpg")
-            
+    
